@@ -53,7 +53,7 @@ func TestGlobalBundle(t *testing.T) {
 		{
 			Name: "with custom unmarshaler",
 			GetBundle: func(t *testing.T) *i18n.Bundle {
-				i18n.RegisterUnmarshaler("TEST", func(data []byte, v any) error {
+				i18n.RegisterDataType("TEST", func(data []byte, v any) error {
 					return json.Unmarshal([]byte(`{"language": "en", "translations": {"test": "test text"}}`), v)
 				})
 

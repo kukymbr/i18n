@@ -6,7 +6,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/kukymbr/i18n/json"
 	"golang.org/x/text/language"
@@ -19,9 +21,16 @@ const (
 	JSON DataType = "JSON"
 )
 
+var dataTypeMu sync.RWMutex
+
 var unmarshalers = map[DataType]UnmarshalerFunc{
 	YAML: yaml.Unmarshal,
 	JSON: json.Unmarshal,
+}
+
+var dataTypeFilters = map[DataType][]*regexp.Regexp{
+	YAML: {regexp.MustCompile(`(?i)\.ya*ml$`)},
+	JSON: {regexp.MustCompile(`(?i)\.json$`)},
 }
 
 // DataType is a bundle source data type.
@@ -64,6 +73,10 @@ func readFromDirectory(
 				return filepath.SkipDir
 			}
 
+			return nil
+		}
+
+		if !acceptFile(dataType, entry.Name()) {
 			return nil
 		}
 
@@ -115,6 +128,10 @@ func readFromEmbeddedDirectory(
 			continue
 		}
 
+		if !acceptFile(dataType, entry.Name()) {
+			return nil
+		}
+
 		if err := readFromEmbeddedFile(fs, entryPath, dataType, each); err != nil {
 			return err
 		}
@@ -154,9 +171,9 @@ func readFromFile(path string, dataType DataType) (language.Tag, Translations, e
 }
 
 func readFromBytes(data []byte, dataType DataType) (language.Tag, Translations, error) {
-	fn, ok := unmarshalers[dataType]
-	if !ok {
-		return language.Tag{}, nil, fmt.Errorf("unsupported data type: %s", dataType)
+	fn, err := getUnmarshaler(dataType)
+	if err != nil {
+		return language.Tag{}, nil, err
 	}
 
 	dto := &bundleDTO{}
@@ -175,4 +192,34 @@ func readFromBytes(data []byte, dataType DataType) (language.Tag, Translations, 
 	}
 
 	return lang, dto.Translations, nil
+}
+
+func getUnmarshaler(dataType DataType) (UnmarshalerFunc, error) {
+	dataTypeMu.RLock()
+	defer dataTypeMu.RUnlock()
+
+	fn, ok := unmarshalers[dataType]
+	if !ok {
+		return nil, fmt.Errorf("unsupported data type: %s", dataType)
+	}
+
+	return fn, nil
+}
+
+func acceptFile(dataType DataType, name string) bool {
+	dataTypeMu.RLock()
+	defer dataTypeMu.RUnlock()
+
+	rxs, ok := dataTypeFilters[dataType]
+	if !ok {
+		return true
+	}
+
+	for _, rx := range rxs {
+		if rx.MatchString(name) {
+			return true
+		}
+	}
+
+	return false
 }
