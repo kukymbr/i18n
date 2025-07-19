@@ -1,0 +1,5 @@
+language: es
+translations:
+  test_1: Prueba 1 en YAML
+  test_2: Prueba 2 en YAML
+  test_3: Prueba {{ .TestN }} en YAML

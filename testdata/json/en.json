@@ -1,0 +1,8 @@
+{
+  "language": "en",
+  "translations": {
+    "test_1": "Test 1 in JSON",
+    "test_2": "Test 2 in JSON",
+    "test_3": "Test {{.TestN}} in JSON"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "language": "es",
+  "translations": {
+    "test_1": "Debe omitirse prueba 1 en JSON",
+    "test_2": "Debe omitirse prrueba 2 en JSON",
+    "test_3": "Debe omitirse prrueba {{ .TestN }} en JSON"
+  }
+}

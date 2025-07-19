@@ -1,0 +1,8 @@
+{
+  "language": "en",
+  "translations": {
+    "test_1": "Should be skipped test 1 in JSON",
+    "test_2": "Should be skipped test 2 in JSON",
+    "test_3": "Should be skipped test {{.TestN}} in JSON"
+  }
+}
