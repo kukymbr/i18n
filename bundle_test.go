@@ -3,6 +3,7 @@ package i18n_test
 import (
 	"embed"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/kukymbr/i18n"
@@ -76,6 +77,7 @@ func TestBundle(t *testing.T) {
 				i18n.FromFiles(i18n.JSON, "testdata/json/es/es.json"),
 				i18n.FromString(i18n.JSON, `{"translations": {"test_1": "Тест 1 из строки"}}`),
 				i18n.FromBytes(i18n.JSON, []byte(`{"language": "he", "translations": {"test_1": "בדיקה 1 מבתים"}}`)),
+				i18n.FromReader(i18n.JSON, strings.NewReader(`{"language": "it", "translations": {"test_1": "Test 1 del lettore"}}`)),
 			},
 			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
 				require.NoError(t, err)
@@ -85,6 +87,7 @@ func TestBundle(t *testing.T) {
 				{Lang: language.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
 				{Lang: language.Russian, Key: "test_1", Expected: "Тест 1 из строки"},
 				{Lang: language.Hebrew, Key: "test_1", Expected: "בדיקה 1 מבתים"},
+				{Lang: language.Italian, Key: "test_1", Expected: "Test 1 del lettore"},
 			},
 		},
 		{

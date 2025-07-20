@@ -1,11 +1,9 @@
 package i18n
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
 	"io"
-	"strings"
 
 	"golang.org/x/text/language"
 )
@@ -64,7 +62,21 @@ func FromReader(dataType DataType, r io.Reader) BundleSource {
 			return fmt.Errorf("failed to read from reader: %w", err)
 		}
 
-		lang, translations, err := readFromBytes(data, dataType)
+		return FromBytes(dataType, data)(b)
+	}
+}
+
+// FromString parses Translations from the specified string.
+func FromString(dataType DataType, inp string) BundleSource {
+	return func(b *Bundle) error {
+		return FromBytes(dataType, []byte(inp))(b)
+	}
+}
+
+// FromBytes parses Translations from the specified bytes array.
+func FromBytes(dataType DataType, inp []byte) BundleSource {
+	return func(b *Bundle) error {
+		lang, translations, err := readFromBytes(inp, dataType)
 		if err != nil {
 			return err
 		}
@@ -73,16 +85,6 @@ func FromReader(dataType DataType, r io.Reader) BundleSource {
 
 		return nil
 	}
-}
-
-// FromString parses Translations from the specified string.
-func FromString(dataType DataType, inp string) BundleSource {
-	return FromReader(dataType, strings.NewReader(inp))
-}
-
-// FromBytes parses Translations from the specified bytes array.
-func FromBytes(dataType DataType, inp []byte) BundleSource {
-	return FromReader(dataType, bytes.NewReader(inp))
 }
 
 // FromFunc adds Translations from the results of the callback fn.
