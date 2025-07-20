@@ -37,6 +37,11 @@ func (b *Bundle) Translate(lang language.Tag, key string, tplData ...any) string
 	return b.translate(lang, key, data)
 }
 
+// T is a short alias for a Translate.
+func (b *Bundle) T(lang language.Tag, key string, tplData ...any) string {
+	return b.Translate(lang, key, tplData...)
+}
+
 // Translate finds a translation for a key.
 func (b *Bundle) translate(lang language.Tag, key string, tplData any) string {
 	if lang == language.Und {

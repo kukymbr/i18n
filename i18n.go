@@ -1,8 +1,6 @@
 package i18n
 
 import (
-	"regexp"
-
 	"golang.org/x/text/language"
 )
 
@@ -25,31 +23,6 @@ func GetGlobalBundle() *Bundle {
 	}
 
 	return globalBundle
-}
-
-// RegisterDataType registers or replaces the UnmarshalerFunc as an unmarshaler for a given DataType.
-// If the fileNameFilters are given, them will be applied while filtering file names in directories.
-// To remove an existing filters for a data type, use `nil` as third argument value:
-// <code>
-// i18n.RegisterDataType("YAML", yaml.Unmarshal, nil)
-// </code>
-func RegisterDataType(t DataType, fn UnmarshalerFunc, fileNameFilters ...*regexp.Regexp) {
-	dataTypeMu.Lock()
-	defer dataTypeMu.Unlock()
-
-	unmarshalers[t] = fn
-
-	if len(fileNameFilters) == 0 {
-		return
-	}
-
-	if len(fileNameFilters) == 1 && fileNameFilters[0] == nil {
-		delete(dataTypeFilters, t)
-
-		return
-	}
-
-	dataTypeFilters[t] = fileNameFilters
 }
 
 // Translate translates key using the global bundle.

@@ -56,6 +56,23 @@ func TestBundle(t *testing.T) {
 			},
 		},
 		{
+			Name:     "From YAML dir (nested keys)",
+			Fallback: language.English,
+			Sources: []i18n.BundleSource{
+				i18n.FromDirs(i18n.YAML, false, "testdata/yaml"),
+			},
+			AssertNew: func(t *testing.T, _ *i18n.Bundle, err error) {
+				require.NoError(t, err)
+			},
+			AssertTranslate: []translationAssertion{
+				{Key: "test_1", Expected: "Test 1 in YAML"},
+				{Key: "errors.test_4", Expected: "Error 1"},
+				{Key: "errors.test_5", Expected: "Error 2"},
+				{Key: "errors.nested.test_6", Expected: "Error 3"},
+				{Key: "errors.nested.test_7", Expected: "Error 4"},
+			},
+		},
+		{
 			Name:     "From JSON non-recursive dirs",
 			Fallback: language.English,
 			Sources: []i18n.BundleSource{
@@ -177,6 +194,42 @@ func TestBundle(t *testing.T) {
 				require.Error(t, err)
 			},
 		},
+		{
+			Name: "When data type is unknown",
+			Sources: []i18n.BundleSource{
+				i18n.FromString("UNKNOWN", "some input"),
+			},
+			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
+				require.Error(t, err)
+			},
+		},
+		{
+			Name: "When invalid translation type",
+			Sources: []i18n.BundleSource{
+				i18n.FromString(i18n.JSON, `{"translations": {"test": 0}}`),
+			},
+			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
+				require.Error(t, err)
+			},
+		},
+		{
+			Name: "When nested translation is invalid",
+			Sources: []i18n.BundleSource{
+				i18n.FromString(i18n.JSON, `{"translations": {"nested": {"test": 0}}}`),
+			},
+			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
+				require.Error(t, err)
+			},
+		},
+		{
+			Name: "When language is invalid",
+			Sources: []i18n.BundleSource{
+				i18n.FromString(i18n.JSON, `{"language": "invalid"}`),
+			},
+			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
+				require.Error(t, err)
+			},
+		},
 		// endregion Negative cases
 	}
 
@@ -195,7 +248,7 @@ func TestBundle(t *testing.T) {
 						tplData = append(tplData, tt.TplData)
 					}
 
-					text := bundle.Translate(tt.Lang, tt.Key, tplData...)
+					text := bundle.T(tt.Lang, tt.Key, tplData...)
 
 					assert.Equal(t, tt.Expected, text)
 				})
