@@ -3,6 +3,7 @@ package i18n_test
 import (
 	"embed"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -25,17 +26,23 @@ type translationAssertion struct {
 	Expected string
 }
 
-type tplData struct {
-	TestN int
+type structTranslationAssertion struct {
+	Lang     language.Tag
+	TplData  *tplData
+	Expected testStruct
 }
 
 func TestBundle(t *testing.T) {
 	tests := []struct {
-		Name            string
-		Fallback        language.Tag
-		Sources         []i18n.BundleSource
+		Name     string
+		Fallback language.Tag
+		Sources  []i18n.BundleSource
+
 		AssertNew       func(t *testing.T, b *i18n.Bundle, err error)
 		AssertTranslate []translationAssertion
+
+		InputTranslateStruct  *testStruct
+		AssertTranslateStruct []structTranslationAssertion
 	}{
 		// region Positive cases
 		{
@@ -53,6 +60,23 @@ func TestBundle(t *testing.T) {
 				{Lang: language.English, Key: "not from translations", Expected: "not from translations"},
 				{Lang: language.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
 				{Key: "test_1", Expected: "Test 1 in JSON"},
+			},
+			InputTranslateStruct: &testStruct{
+				TestSkip:       "test_1",
+				TestWithoutTag: "test_1",
+			},
+			AssertTranslateStruct: []structTranslationAssertion{
+				{
+					Lang:    language.English,
+					TplData: &tplData{TestN: 3},
+					Expected: testStruct{
+						Test1:          "Test 1 in JSON",
+						Test2:          "Test 2 in JSON",
+						Test3:          "Test 3 in JSON",
+						TestSkip:       "test_1",
+						TestWithoutTag: "Test 1 in JSON",
+					},
+				},
 			},
 		},
 		{
@@ -251,6 +275,30 @@ func TestBundle(t *testing.T) {
 					text := bundle.T(tt.Lang, tt.Key, tplData...)
 
 					assert.Equal(t, tt.Expected, text)
+				})
+			}
+
+			if test.InputTranslateStruct == nil {
+				return
+			}
+
+			for i, tt := range test.AssertTranslateStruct {
+				t.Run(test.Name+":struct:"+fmt.Sprintf("%d", i), func(t *testing.T) {
+					var (
+						inp     = &testStruct{}
+						tplData []any
+					)
+
+					if tt.TplData != nil {
+						tplData = append(tplData, tt.TplData)
+					}
+
+					*inp = *test.InputTranslateStruct
+
+					err := bundle.TranslateStruct(tt.Lang, inp, tplData...)
+					require.NoError(t, err)
+
+					assert.Equal(t, tt.Expected, *inp)
 				})
 			}
 		})

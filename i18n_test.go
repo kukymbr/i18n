@@ -29,8 +29,8 @@ func TestGlobalBundle(t *testing.T) {
 					language.English,
 					i18n.FromFunc(func() (language.Tag, i18n.Translations, error) {
 						return language.English, i18n.Translations{
-							"test":  "test text",
-							"test2": "test {{ .TestN }} text",
+							"test_1": "test text",
+							"test_2": "test {{ .TestN }} text",
 						}, nil
 					}),
 				)
@@ -40,14 +40,24 @@ func TestGlobalBundle(t *testing.T) {
 				return b
 			},
 			Assert: func(t *testing.T) {
-				assert.Equal(t, "test text", i18n.Translate(language.English, "test"))
+				tplData := tplData{TestN: 2}
+
+				assert.Equal(t, "test text", i18n.Translate(language.English, "test_1"))
 				assert.Equal(
 					t,
 					"test 2 text",
-					i18n.T(language.English, "test2", map[string]any{
-						"TestN": "2",
-					}),
+					i18n.T(language.English, "test_2", tplData),
 				)
+
+				ts := &testStruct{}
+				err := i18n.TranslateStruct(language.English, ts, tplData)
+
+				require.NoError(t, err)
+				assert.Equal(t, testStruct{
+					Test1: "test text",
+					Test2: "test 2 text",
+					Test3: "test_3",
+				}, *ts)
 			},
 		},
 		{
@@ -76,7 +86,7 @@ func TestGlobalBundle(t *testing.T) {
 			}
 
 			require.NotPanics(t, func() {
-				b := i18n.GetGlobalBundle()
+				b := i18n.B()
 
 				require.NotNil(t, b)
 			})

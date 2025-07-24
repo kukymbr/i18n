@@ -25,6 +25,11 @@ func GetGlobalBundle() *Bundle {
 	return globalBundle
 }
 
+// B is a short alias for GetGlobalBundle function.
+func B() *Bundle {
+	return GetGlobalBundle()
+}
+
 // Translate translates key using the global bundle.
 func Translate[T Language](lang T, key string, tplData ...any) string {
 	return GetGlobalBundle().Translate(Lang(lang), key, tplData...)
@@ -33,4 +38,10 @@ func Translate[T Language](lang T, key string, tplData ...any) string {
 // T is a short alias of Translate function.
 func T[T Language](lang T, key string, tplData ...any) string {
 	return Translate[T](lang, key, tplData...)
+}
+
+// TranslateStruct translates a structure using the global bundle.
+// See Bundle.TranslateStruct for info.
+func TranslateStruct(lang language.Tag, structure any, tplData ...any) error {
+	return GetGlobalBundle().TranslateStruct(lang, structure, tplData...)
 }
