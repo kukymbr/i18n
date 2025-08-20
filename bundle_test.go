@@ -304,3 +304,28 @@ func TestBundle(t *testing.T) {
 		})
 	}
 }
+
+func TestEmptyBundle(t *testing.T) {
+	bundle := i18n.NewEmptyBundle()
+
+	assert.NotPanics(t, func() {
+		assert.Equal(t, "Test 1", bundle.T(language.Japanese, "Test 1"))
+		assert.Equal(t, "Test 2", bundle.Translate(language.Hungarian, "Test 2"))
+
+		test3 := testStruct{
+			Test1:          "Test1",
+			Test2:          "Test2",
+			Test3:          "Test3",
+			TestSkip:       "TestSkip",
+			TestWithoutTag: "TestWithoutTag",
+		}
+
+		require.NoError(t, bundle.TranslateStruct(language.Amharic, &test3))
+
+		assert.Equal(t, "test_1", test3.Test1)
+		assert.Equal(t, "test_2", test3.Test2)
+		assert.Equal(t, "test_3", test3.Test3)
+		assert.Equal(t, "TestSkip", test3.TestSkip)
+		assert.Equal(t, "TestWithoutTag", test3.TestWithoutTag)
+	})
+}

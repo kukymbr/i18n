@@ -23,6 +23,15 @@ func NewBundle[T Language](fallbackLanguage T, sources ...BundleSource) (*Bundle
 	return b, nil
 }
 
+// NewEmptyBundle returns new Bundle without any translations.
+func NewEmptyBundle() *Bundle {
+	b := &Bundle{fallbackLanguage: language.English}
+
+	b.translations = make(map[language.Tag]Translations)
+
+	return b
+}
+
 // Bundle is an i18n translations bundle.
 type Bundle struct {
 	fallbackLanguage language.Tag
