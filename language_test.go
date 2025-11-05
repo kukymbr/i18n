@@ -5,32 +5,31 @@ import (
 
 	"github.com/kukymbr/i18n"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/text/language"
 )
 
 func TestLang_Strings(t *testing.T) {
 	tests := []struct {
 		Input    string
-		Fallback language.Tag
-		Expected language.Tag
+		Fallback i18n.Tag
+		Expected i18n.Tag
 	}{
 		{
 			Input:    "en",
-			Expected: language.English,
+			Expected: i18n.English,
 		},
 		{
 			Input:    "fr",
-			Expected: language.French,
+			Expected: i18n.French,
 		},
 		{
 			Input:    "",
-			Fallback: language.French,
-			Expected: language.French,
+			Fallback: i18n.French,
+			Expected: i18n.French,
 		},
 		{
 			Input:    "unknown",
-			Fallback: language.French,
-			Expected: language.French,
+			Fallback: i18n.French,
+			Expected: i18n.French,
 		},
 	}
 
@@ -46,23 +45,23 @@ func TestLang_Strings(t *testing.T) {
 func TestLang_Tags(t *testing.T) {
 	tests := []struct {
 		Name     string
-		Input    language.Tag
-		Expected language.Tag
+		Input    i18n.Tag
+		Expected i18n.Tag
 	}{
 		{
 			Name:     "en",
-			Input:    language.English,
-			Expected: language.English,
+			Input:    i18n.English,
+			Expected: i18n.English,
 		},
 		{
 			Name:     "fr",
-			Input:    language.French,
-			Expected: language.French,
+			Input:    i18n.French,
+			Expected: i18n.French,
 		},
 		{
 			Name:     "und",
-			Input:    language.Und,
-			Expected: language.English,
+			Input:    i18n.Und,
+			Expected: i18n.English,
 		},
 	}
 

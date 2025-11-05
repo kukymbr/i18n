@@ -2,8 +2,6 @@ package i18n
 
 import (
 	"fmt"
-
-	"golang.org/x/text/language"
 )
 
 type unmarshalDTO struct {
@@ -12,30 +10,30 @@ type unmarshalDTO struct {
 	Translations map[string]any `yaml:"translations" json:"translations" db:"translations" bson:"translations" xml:"translations"`
 }
 
-func unmarshal(dataType DataType, data []byte) (language.Tag, Translations, error) {
+func unmarshal(dataType DataType, data []byte) (Tag, Translations, error) {
 	dto := unmarshalDTO{}
 	translations := Translations{}
 
 	fn, err := getUnmarshaler(dataType)
 	if err != nil {
-		return language.Tag{}, nil, err
+		return Und, nil, err
 	}
 
 	if err := fn(data, &dto); err != nil {
-		return language.Tag{}, nil, fmt.Errorf("failed to unmarshal translations data: %w", err)
+		return Und, nil, fmt.Errorf("failed to unmarshal translations data: %w", err)
 	}
 
 	if err := parseTranslations("", dto.Translations, translations); err != nil {
-		return language.Tag{}, nil, fmt.Errorf("failed to parse translations: %w", err)
+		return Und, nil, fmt.Errorf("failed to parse translations: %w", err)
 	}
 
 	if dto.Language == "" {
-		return language.Und, translations, nil
+		return Und, translations, nil
 	}
 
-	lang, err := language.Parse(dto.Language)
+	lang, err := Parse(dto.Language)
 	if err != nil {
-		return language.Tag{}, nil, fmt.Errorf("failed to parse language '%s': %w", dto.Language, err)
+		return Und, nil, fmt.Errorf("failed to parse language '%s': %w", dto.Language, err)
 	}
 
 	return lang, translations, nil

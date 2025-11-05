@@ -7,16 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"golang.org/x/text/language"
 )
 
-func readFromDirectory(
-	path string,
-	dataType DataType,
-	recursive bool,
-	each func(language.Tag, Translations),
-) error {
+func readFromDirectory(path string, dataType DataType, recursive bool, each func(Tag, Translations)) error {
 	err := filepath.WalkDir(path, func(entryPath string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -67,7 +60,7 @@ func readFromEmbeddedDirectory(
 	path string,
 	dataType DataType,
 	recursive bool,
-	each func(language.Tag, Translations),
+	each func(Tag, Translations),
 ) error {
 	entries, err := fs.ReadDir(path)
 	if err != nil {
@@ -110,7 +103,7 @@ func readFromEmbeddedFile(
 	fs embed.FS,
 	path string,
 	dataType DataType,
-	each func(language.Tag, Translations),
+	each func(Tag, Translations),
 ) error {
 	data, err := fs.ReadFile(path)
 	if err != nil {
@@ -127,16 +120,16 @@ func readFromEmbeddedFile(
 	return nil
 }
 
-func readFromFile(path string, dataType DataType) (language.Tag, Translations, error) {
+func readFromFile(path string, dataType DataType) (Tag, Translations, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return language.Tag{}, nil, fmt.Errorf("failed to read i18n file '%s': %w", path, err)
+		return Und, nil, fmt.Errorf("failed to read i18n file '%s': %w", path, err)
 	}
 
 	return readFromBytes(data, dataType)
 }
 
-func readFromBytes(data []byte, dataType DataType) (language.Tag, Translations, error) {
+func readFromBytes(data []byte, dataType DataType) (Tag, Translations, error) {
 	return unmarshal(dataType, data)
 }
 

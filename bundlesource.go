@@ -4,8 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"io"
-
-	"golang.org/x/text/language"
 )
 
 // BundleSource is a function adding Translations into the Bundle.
@@ -88,7 +86,7 @@ func FromBytes(dataType DataType, inp []byte) BundleSource {
 }
 
 // FromFunc adds Translations from the results of the callback fn.
-func FromFunc(fn func() (language.Tag, Translations, error)) BundleSource {
+func FromFunc(fn func() (Tag, Translations, error)) BundleSource {
 	return func(b *Bundle) error {
 		lang, translations, err := fn()
 		if err != nil {

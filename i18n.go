@@ -42,6 +42,6 @@ func T[T Language](lang T, key string, tplData ...any) string {
 
 // TranslateStruct translates a structure using the global bundle.
 // See Bundle.TranslateStruct for info.
-func TranslateStruct(lang language.Tag, structure any, tplData ...any) error {
+func TranslateStruct(lang Tag, structure any, tplData ...any) error {
 	return GetGlobalBundle().TranslateStruct(lang, structure, tplData...)
 }

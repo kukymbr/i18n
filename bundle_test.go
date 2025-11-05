@@ -10,7 +10,6 @@ import (
 	"github.com/kukymbr/i18n"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/text/language"
 )
 
 //go:embed all:testdata/json
@@ -20,14 +19,14 @@ var embeddedJSON embed.FS
 var embeddedInvalidJSON embed.FS
 
 type translationAssertion struct {
-	Lang     language.Tag
+	Lang     i18n.Tag
 	Key      string
 	TplData  *tplData
 	Expected string
 }
 
 type structTranslationAssertion struct {
-	Lang     language.Tag
+	Lang     i18n.Tag
 	TplData  *tplData
 	Expected testStruct
 }
@@ -35,7 +34,7 @@ type structTranslationAssertion struct {
 func TestBundle(t *testing.T) {
 	tests := []struct {
 		Name     string
-		Fallback language.Tag
+		Fallback i18n.Tag
 		Sources  []i18n.BundleSource
 
 		AssertNew       func(t *testing.T, b *i18n.Bundle, err error)
@@ -47,7 +46,7 @@ func TestBundle(t *testing.T) {
 		// region Positive cases
 		{
 			Name:     "From JSON recursive dirs",
-			Fallback: language.English,
+			Fallback: i18n.English,
 			Sources: []i18n.BundleSource{
 				i18n.FromDirs(i18n.JSON, true, "testdata/json"),
 			},
@@ -55,10 +54,10 @@ func TestBundle(t *testing.T) {
 				require.NoError(t, err)
 			},
 			AssertTranslate: []translationAssertion{
-				{Lang: language.English, Key: "test_1", Expected: "Test 1 in JSON"},
-				{Lang: language.English, TplData: &tplData{TestN: 5}, Key: "test_3", Expected: "Test 5 in JSON"},
-				{Lang: language.English, Key: "not from translations", Expected: "not from translations"},
-				{Lang: language.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
+				{Lang: i18n.English, Key: "test_1", Expected: "Test 1 in JSON"},
+				{Lang: i18n.English, TplData: &tplData{TestN: 5}, Key: "test_3", Expected: "Test 5 in JSON"},
+				{Lang: i18n.English, Key: "not from translations", Expected: "not from translations"},
+				{Lang: i18n.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
 				{Key: "test_1", Expected: "Test 1 in JSON"},
 			},
 			InputTranslateStruct: &testStruct{
@@ -67,7 +66,7 @@ func TestBundle(t *testing.T) {
 			},
 			AssertTranslateStruct: []structTranslationAssertion{
 				{
-					Lang:    language.English,
+					Lang:    i18n.English,
 					TplData: &tplData{TestN: 3},
 					Expected: testStruct{
 						Test1:          "Test 1 in JSON",
@@ -81,7 +80,7 @@ func TestBundle(t *testing.T) {
 		},
 		{
 			Name:     "From YAML dir (nested keys)",
-			Fallback: language.English,
+			Fallback: i18n.English,
 			Sources: []i18n.BundleSource{
 				i18n.FromDirs(i18n.YAML, false, "testdata/yaml"),
 			},
@@ -98,7 +97,7 @@ func TestBundle(t *testing.T) {
 		},
 		{
 			Name:     "From JSON non-recursive dirs",
-			Fallback: language.English,
+			Fallback: i18n.English,
 			Sources: []i18n.BundleSource{
 				i18n.FromDirs(i18n.JSON, false, "testdata/json"),
 			},
@@ -106,13 +105,13 @@ func TestBundle(t *testing.T) {
 				require.NoError(t, err)
 			},
 			AssertTranslate: []translationAssertion{
-				{Lang: language.English, Key: "test_1", Expected: "Test 1 in JSON"},
-				{Lang: language.Spanish, Key: "test_1", Expected: "Test 1 in JSON"},
+				{Lang: i18n.English, Key: "test_1", Expected: "Test 1 in JSON"},
+				{Lang: i18n.Spanish, Key: "test_1", Expected: "Test 1 in JSON"},
 			},
 		},
 		{
 			Name:     "From multiple sources",
-			Fallback: language.Russian,
+			Fallback: i18n.Russian,
 			Sources: []i18n.BundleSource{
 				i18n.FromFiles(i18n.YAML, "testdata/yaml/en.yml"),
 				i18n.FromFiles(i18n.JSON, "testdata/json/es/es.json"),
@@ -124,26 +123,26 @@ func TestBundle(t *testing.T) {
 				require.NoError(t, err)
 			},
 			AssertTranslate: []translationAssertion{
-				{Lang: language.English, Key: "test_1", Expected: "Test 1 in YAML"},
-				{Lang: language.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
-				{Lang: language.Russian, Key: "test_1", Expected: "Тест 1 из строки"},
-				{Lang: language.Hebrew, Key: "test_1", Expected: "בדיקה 1 מבתים"},
-				{Lang: language.Italian, Key: "test_1", Expected: "Test 1 del lettore"},
+				{Lang: i18n.English, Key: "test_1", Expected: "Test 1 in YAML"},
+				{Lang: i18n.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
+				{Lang: i18n.Russian, Key: "test_1", Expected: "Тест 1 из строки"},
+				{Lang: i18n.Hebrew, Key: "test_1", Expected: "בדיקה 1 מבתים"},
+				{Lang: i18n.Italian, Key: "test_1", Expected: "Test 1 del lettore"},
 			},
 		},
 		{
 			Name: "From func",
 			Sources: []i18n.BundleSource{
-				i18n.FromFunc(func() (language.Tag, i18n.Translations, error) {
-					return language.Italian, i18n.Translations{"test_1": "Test 1 da callback"}, nil
+				i18n.FromFunc(func() (i18n.Tag, i18n.Translations, error) {
+					return i18n.Italian, i18n.Translations{"test_1": "Test 1 da callback"}, nil
 				}),
 			},
 			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
 				require.NoError(t, err)
 			},
 			AssertTranslate: []translationAssertion{
-				{Lang: language.English, Key: "test_1", Expected: "test_1"},
-				{Lang: language.Italian, Key: "test_1", Expected: "Test 1 da callback"},
+				{Lang: i18n.English, Key: "test_1", Expected: "test_1"},
+				{Lang: i18n.Italian, Key: "test_1", Expected: "Test 1 da callback"},
 			},
 		},
 		{
@@ -155,8 +154,8 @@ func TestBundle(t *testing.T) {
 				require.NoError(t, err)
 			},
 			AssertTranslate: []translationAssertion{
-				{Lang: language.English, Key: "test_1", Expected: "Test 1 in JSON"},
-				{Lang: language.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
+				{Lang: i18n.English, Key: "test_1", Expected: "Test 1 in JSON"},
+				{Lang: i18n.Spanish, Key: "test_1", Expected: "Prueba 1 en JSON"},
 			},
 		},
 		// endregion Positive cases
@@ -201,8 +200,8 @@ func TestBundle(t *testing.T) {
 		{
 			Name: "When callback returns error",
 			Sources: []i18n.BundleSource{
-				i18n.FromFunc(func() (language.Tag, i18n.Translations, error) {
-					return language.Und, nil, errors.New("test error")
+				i18n.FromFunc(func() (i18n.Tag, i18n.Translations, error) {
+					return i18n.Und, nil, errors.New("test error")
 				}),
 			},
 			AssertNew: func(t *testing.T, b *i18n.Bundle, err error) {
@@ -309,8 +308,8 @@ func TestEmptyBundle(t *testing.T) {
 	bundle := i18n.NewEmptyBundle()
 
 	assert.NotPanics(t, func() {
-		assert.Equal(t, "Test 1", bundle.T(language.Japanese, "Test 1"))
-		assert.Equal(t, "Test 2", bundle.Translate(language.Hungarian, "Test 2"))
+		assert.Equal(t, "Test 1", bundle.T(i18n.Japanese, "Test 1"))
+		assert.Equal(t, "Test 2", bundle.Translate(i18n.Hungarian, "Test 2"))
 
 		test3 := testStruct{
 			Test1:          "Test1",
@@ -320,7 +319,7 @@ func TestEmptyBundle(t *testing.T) {
 			TestWithoutTag: "TestWithoutTag",
 		}
 
-		require.NoError(t, bundle.TranslateStruct(language.Amharic, &test3))
+		require.NoError(t, bundle.TranslateStruct(i18n.Amharic, &test3))
 
 		assert.Equal(t, "test_1", test3.Test1)
 		assert.Equal(t, "test_2", test3.Test2)

@@ -5,14 +5,13 @@ import (
 	"strings"
 
 	"github.com/kukymbr/i18n/internal/tagsparser"
-	"golang.org/x/text/language"
 )
 
 // NewBundle creates new Bundle instance.
 func NewBundle[T Language](fallbackLanguage T, sources ...BundleSource) (*Bundle, error) {
 	b := &Bundle{fallbackLanguage: Lang(fallbackLanguage)}
 
-	b.translations = make(map[language.Tag]Translations)
+	b.translations = make(map[Tag]Translations)
 
 	for _, source := range sources {
 		if err := source(b); err != nil {
@@ -25,21 +24,21 @@ func NewBundle[T Language](fallbackLanguage T, sources ...BundleSource) (*Bundle
 
 // NewEmptyBundle returns new Bundle without any translations.
 func NewEmptyBundle() *Bundle {
-	b := &Bundle{fallbackLanguage: language.English}
+	b := &Bundle{fallbackLanguage: English}
 
-	b.translations = make(map[language.Tag]Translations)
+	b.translations = make(map[Tag]Translations)
 
 	return b
 }
 
 // Bundle is an i18n translations bundle.
 type Bundle struct {
-	fallbackLanguage language.Tag
-	translations     map[language.Tag]Translations
+	fallbackLanguage Tag
+	translations     map[Tag]Translations
 }
 
 // Translate finds a translation for a key.
-func (b *Bundle) Translate(lang language.Tag, key string, tplData ...any) string {
+func (b *Bundle) Translate(lang Tag, key string, tplData ...any) string {
 	var data any
 	if len(tplData) > 0 {
 		data = tplData[0]
@@ -49,7 +48,7 @@ func (b *Bundle) Translate(lang language.Tag, key string, tplData ...any) string
 }
 
 // T is a short alias for a Translate.
-func (b *Bundle) T(lang language.Tag, key string, tplData ...any) string {
+func (b *Bundle) T(lang Tag, key string, tplData ...any) string {
 	return b.Translate(lang, key, tplData...)
 }
 
@@ -60,7 +59,7 @@ func (b *Bundle) T(lang language.Tag, key string, tplData ...any) string {
 // if no `i18n` found, field's value is used as a key.
 // Add `i18n:"-"` tag to skip field's translation.
 // Only string values are affected.
-func (b *Bundle) TranslateStruct(lang language.Tag, structure any, tplData ...any) error {
+func (b *Bundle) TranslateStruct(lang Tag, structure any, tplData ...any) error {
 	err := tagsparser.ParseTags(structure, func(s string) string {
 		return b.Translate(lang, s, tplData...)
 	})
@@ -72,8 +71,8 @@ func (b *Bundle) TranslateStruct(lang language.Tag, structure any, tplData ...an
 }
 
 // Translate finds a translation for a key.
-func (b *Bundle) translate(lang language.Tag, key string, tplData any) string {
-	if lang == language.Und {
+func (b *Bundle) translate(lang Tag, key string, tplData any) string {
+	if lang == Und {
 		lang = b.fallbackLanguage
 	}
 
@@ -96,20 +95,20 @@ func (b *Bundle) translate(lang language.Tag, key string, tplData any) string {
 	return prepareText(key, key, tplData)
 }
 
-func (b *Bundle) getTranslation(lang language.Tag, key string) (string, bool) {
+func (b *Bundle) getTranslation(lang Tag, key string) (string, bool) {
 	text, ok := b.translations[lang][key]
 
 	return text, ok
 }
 
-func (b *Bundle) addTranslations(lang language.Tag, translations Translations) {
+func (b *Bundle) addTranslations(lang Tag, translations Translations) {
 	for key, text := range translations {
 		b.addTranslation(lang, key, text)
 	}
 }
 
-func (b *Bundle) addTranslation(lang language.Tag, key string, text string) {
-	if lang == language.Und {
+func (b *Bundle) addTranslation(lang Tag, key string, text string) {
+	if lang == Und {
 		lang = b.fallbackLanguage
 	}
 
