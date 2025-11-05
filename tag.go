@@ -122,6 +122,14 @@ func (t Tag) String() string {
 	return t.Tag.String()
 }
 
+func (t Tag) IsValid() bool {
+	return t != Und
+}
+
+func (t Tag) Parent() Tag {
+	return Tag{t.Tag.Parent()}
+}
+
 func (t Tag) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.String())
 }
