@@ -79,7 +79,7 @@ func readFromEmbeddedDirectory(
 				continue
 			}
 
-			err := readFromEmbeddedDirectory(fs, filepath.Join(entryPath), dataType, recursive, each)
+			err := readFromEmbeddedDirectory(fs, entryPath, dataType, recursive, each)
 			if err != nil {
 				return fmt.Errorf("%s: %w", entryPath, err)
 			}

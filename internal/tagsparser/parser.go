@@ -1,6 +1,7 @@
 package tagsparser
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 )
@@ -26,12 +27,12 @@ func ParseTags(inp any, updateValueFn func(string) string) error {
 
 	inpValue := reflect.ValueOf(inp)
 	if inpValue.IsNil() {
-		return fmt.Errorf("got nil structure")
+		return errors.New("got nil structure")
 	}
 
 	inpElem := inpValue.Elem()
 
-	for i := 0; i < elemType.NumField(); i++ {
+	for i := range elemType.NumField() {
 		field := elemType.Field(i)
 
 		if field.Type.Kind() != reflect.String {

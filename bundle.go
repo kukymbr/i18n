@@ -7,9 +7,18 @@ import (
 	"github.com/kukymbr/i18n/internal/tagsparser"
 )
 
-// NewBundle creates new Bundle instance.
-func NewBundle[T Language](fallbackLanguage T, sources ...BundleSource) (*Bundle, error) {
-	b := &Bundle{fallbackLanguage: Lang(fallbackLanguage)}
+// Translations is a map of translations in a key:text format
+type Translations map[string]string
+
+// Bundle is an i18n translations bundle.
+type Bundle struct {
+	fallbackLanguage Tag
+	translations     map[Tag]Translations
+}
+
+// NewBundle creates a new Bundle instance.
+func NewBundle(fallbackLanguage Tag, sources ...BundleSource) (*Bundle, error) {
+	b := &Bundle{fallbackLanguage: fallbackLanguage}
 
 	b.translations = make(map[Tag]Translations)
 
@@ -22,19 +31,11 @@ func NewBundle[T Language](fallbackLanguage T, sources ...BundleSource) (*Bundle
 	return b, nil
 }
 
-// NewEmptyBundle returns new Bundle without any translations.
+// NewEmptyBundle returns a new Bundle without any translations.
 func NewEmptyBundle() *Bundle {
-	b := &Bundle{fallbackLanguage: English}
-
-	b.translations = make(map[Tag]Translations)
+	b, _ := NewBundle(English)
 
 	return b
-}
-
-// Bundle is an i18n translations bundle.
-type Bundle struct {
-	fallbackLanguage Tag
-	translations     map[Tag]Translations
 }
 
 // Translate finds a translation for a key.
@@ -56,7 +57,7 @@ func (b *Bundle) T(lang Tag, key string, tplData ...any) string {
 // The structure argument must be a pointer to a non-nil structure variable.
 //
 // The `i18n:"field.key"` tag format is expected to get a field's translation key;
-// if no `i18n` found, field's value is used as a key.
+// if no `i18n ` is found, the field's value is used as a key.
 // Add `i18n:"-"` tag to skip field's translation.
 // Only string values are affected.
 func (b *Bundle) TranslateStruct(lang Tag, structure any, tplData ...any) error {

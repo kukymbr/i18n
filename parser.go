@@ -5,8 +5,7 @@ import (
 )
 
 type unmarshalDTO struct {
-	Language string `yaml:"language" json:"language" db:"language" bson:"language" xml:"language"`
-	//nolint:lll
+	Language     string         `yaml:"language" json:"language" db:"language" bson:"language" xml:"language"`
 	Translations map[string]any `yaml:"translations" json:"translations" db:"translations" bson:"translations" xml:"translations"`
 }
 

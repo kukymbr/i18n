@@ -1,9 +1,5 @@
 package i18n
 
-import (
-	"golang.org/x/text/language"
-)
-
 var globalBundle *Bundle
 
 // SetGlobalBundle sets a global Bundle instance.
@@ -16,7 +12,7 @@ func GetGlobalBundle() *Bundle {
 	if globalBundle == nil {
 		var err error
 
-		globalBundle, err = NewBundle(language.English)
+		globalBundle, err = NewBundle(English)
 		if err != nil {
 			panic(err)
 		}
@@ -31,13 +27,13 @@ func B() *Bundle {
 }
 
 // Translate translates key using the global bundle.
-func Translate[T Language](lang T, key string, tplData ...any) string {
-	return GetGlobalBundle().Translate(Lang(lang), key, tplData...)
+func Translate(lang Tag, key string, tplData ...any) string {
+	return GetGlobalBundle().Translate(lang, key, tplData...)
 }
 
 // T is a short alias of Translate function.
-func T[T Language](lang T, key string, tplData ...any) string {
-	return Translate[T](lang, key, tplData...)
+func T(lang Tag, key string, tplData ...any) string {
+	return Translate(lang, key, tplData...)
 }
 
 // TranslateStruct translates a structure using the global bundle.

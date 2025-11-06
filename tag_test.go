@@ -50,6 +50,12 @@ func TestParse(t *testing.T) {
 
 			assert.Equal(t, test.Expected.String(), tag.String())
 		})
+
+		t.Run("Make "+test.Input, func(t *testing.T) {
+			tag := i18n.Make(test.Input)
+
+			assert.Equal(t, test.Expected.String(), tag.String())
+		})
 	}
 }
 

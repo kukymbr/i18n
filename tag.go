@@ -92,6 +92,7 @@ var (
 	Zulu                 = Tag{language.Zulu}
 )
 
+//nolint:recvcheck // for unmarshaling
 type Tag struct {
 	language.Tag
 }
@@ -109,6 +110,16 @@ func MustParse[T ~string](s T) Tag {
 	tag, err := Parse(s)
 	if err != nil {
 		panic(err)
+	}
+
+	return tag
+}
+
+func Make[T ~string](s T, fallback ...Tag) Tag {
+	tag, _ := Parse(s)
+
+	if tag == Und && len(fallback) > 0 {
+		tag = fallback[0]
 	}
 
 	return tag
@@ -187,6 +198,6 @@ func (t *Tag) Scan(value any) error {
 	return nil
 }
 
-func (t *Tag) Value() (driver.Value, error) {
+func (t Tag) Value() (driver.Value, error) {
 	return t.String(), nil
 }

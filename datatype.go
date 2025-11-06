@@ -34,7 +34,7 @@ type UnmarshalerFunc func(data []byte, v any) error
 
 // RegisterDataType registers or replaces the UnmarshalerFunc as an unmarshaler for a given DataType.
 // If the fileNameFilters are given, them will be applied while filtering file names in directories.
-// To remove an existing filters for a data type, use `nil` as third argument value:
+// To remove existing filters for a data type, use `nil` as a third argument value:
 // <code>
 // i18n.RegisterDataType("YAML", yaml.Unmarshal, nil)
 // </code>
