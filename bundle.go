@@ -71,6 +71,11 @@ func (b *Bundle) TranslateStruct(lang Tag, structure any, tplData ...any) error 
 	return nil
 }
 
+// GetFallbackLanguage returns the fallback language.
+func (b *Bundle) GetFallbackLanguage() Tag {
+	return b.fallbackLanguage
+}
+
 // Translate finds a translation for a key.
 func (b *Bundle) translate(lang Tag, key string, tplData any) string {
 	if lang == Und {
