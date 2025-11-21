@@ -42,6 +42,8 @@ func TestBundle(t *testing.T) {
 
 		InputTranslateStruct  *testStruct
 		AssertTranslateStruct []structTranslationAssertion
+
+		AssertExport func(t *testing.T, b i18n.BundleExport)
 	}{
 		// region Positive cases
 		{
@@ -76,6 +78,14 @@ func TestBundle(t *testing.T) {
 						TestWithoutTag: "Test 1 in JSON",
 					},
 				},
+			},
+			AssertExport: func(t *testing.T, b i18n.BundleExport) {
+				require.Len(t, b.Languages, 2)
+				assert.Equal(t, b.FallbackLanguage, i18n.English)
+				assert.Equal(t, b.Languages[0].Language, i18n.English)
+				assert.Equal(t, b.Languages[1].Language, i18n.Spanish)
+				assert.Len(t, b.Languages[0].Translations, 3)
+				assert.Len(t, b.Languages[1].Translations, 3)
 			},
 		},
 		{
@@ -277,27 +287,32 @@ func TestBundle(t *testing.T) {
 				})
 			}
 
-			if test.InputTranslateStruct == nil {
-				return
+			if test.InputTranslateStruct != nil {
+				for i, tt := range test.AssertTranslateStruct {
+					t.Run(test.Name+":struct:"+fmt.Sprintf("%d", i), func(t *testing.T) {
+						var (
+							inp     = &testStruct{}
+							tplData []any
+						)
+
+						if tt.TplData != nil {
+							tplData = append(tplData, tt.TplData)
+						}
+
+						*inp = *test.InputTranslateStruct
+
+						err := bundle.TranslateStruct(tt.Lang, inp, tplData...)
+						require.NoError(t, err)
+
+						assert.Equal(t, tt.Expected, *inp)
+					})
+				}
 			}
 
-			for i, tt := range test.AssertTranslateStruct {
-				t.Run(test.Name+":struct:"+fmt.Sprintf("%d", i), func(t *testing.T) {
-					var (
-						inp     = &testStruct{}
-						tplData []any
-					)
-
-					if tt.TplData != nil {
-						tplData = append(tplData, tt.TplData)
-					}
-
-					*inp = *test.InputTranslateStruct
-
-					err := bundle.TranslateStruct(tt.Lang, inp, tplData...)
-					require.NoError(t, err)
-
-					assert.Equal(t, tt.Expected, *inp)
+			if test.AssertExport != nil {
+				t.Run(test.Name+":export", func(t *testing.T) {
+					export := i18n.NewBundleExport(bundle)
+					test.AssertExport(t, export)
 				})
 			}
 		})
