@@ -16,6 +16,10 @@ type LanguageExport struct {
 
 // NewBundleExport creates a new BundleExport instance from a Bundle.
 func NewBundleExport(b *Bundle) BundleExport {
+	if b == nil {
+		b = NewEmptyBundle()
+	}
+
 	container := BundleExport{
 		FallbackLanguage: b.fallbackLanguage,
 		Languages:        make([]LanguageExport, 0, len(b.translations)),
