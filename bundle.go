@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/kukymbr/i18n/internal/tagsparser"
 )
@@ -17,6 +18,9 @@ type Translations map[string]string
 type Bundle struct {
 	fallbackLanguage Tag
 	translations     map[Tag]Translations
+
+	hashMu sync.RWMutex
+	hash   string
 }
 
 // NewBundle creates a new Bundle instance.
@@ -80,7 +84,21 @@ func (b *Bundle) GetFallbackLanguage() Tag {
 }
 
 // CalcHash calculates hash of the whole bundle.
+// Calculates hash once per instance.
 func (b *Bundle) CalcHash() (string, error) {
+	b.hashMu.RLock()
+
+	if b.hash != "" {
+		b.hashMu.RUnlock()
+
+		return b.hash, nil
+	}
+
+	b.hashMu.RUnlock()
+
+	b.hashMu.Lock()
+	defer b.hashMu.Unlock()
+
 	// Prepare sorted list of tags to avoid random hash changes because of unstable map keys order.
 	tags := getSortedKeys(b.translations, func(a Tag, b Tag) int {
 		return strings.Compare(a.String(), b.String())
@@ -98,7 +116,9 @@ func (b *Bundle) CalcHash() (string, error) {
 		}
 	}
 
-	return hex.EncodeToString(hasher.Sum(nil)), nil
+	b.hash = hex.EncodeToString(hasher.Sum(nil))
+
+	return b.hash, nil
 }
 
 // Translate finds a translation for a key.
