@@ -1,7 +1,10 @@
 package i18n
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/kukymbr/i18n/internal/tagsparser"
@@ -76,6 +79,28 @@ func (b *Bundle) GetFallbackLanguage() Tag {
 	return b.fallbackLanguage
 }
 
+// CalcHash calculates hash of the whole bundle.
+func (b *Bundle) CalcHash() (string, error) {
+	// Prepare sorted list of tags to avoid random hash changes because of unstable map keys order.
+	tags := getSortedKeys(b.translations, func(a Tag, b Tag) int {
+		return strings.Compare(a.String(), b.String())
+	})
+
+	hasher := sha256.New()
+
+	hasher.Write([]byte("_fallback:" + b.fallbackLanguage.String() + ";"))
+
+	for _, tag := range tags {
+		keys := getSortedKeys(b.translations[tag], strings.Compare)
+
+		for _, key := range keys {
+			hasher.Write([]byte(key + ":" + b.translations[tag][key] + ";"))
+		}
+	}
+
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
 // Translate finds a translation for a key.
 func (b *Bundle) translate(lang Tag, key string, tplData any) string {
 	if lang == Und {
@@ -123,4 +148,15 @@ func (b *Bundle) addTranslation(lang Tag, key string, text string) {
 	}
 
 	b.translations[lang][key] = text
+}
+
+func getSortedKeys[Tk comparable, Tv any](s map[Tk]Tv, compareFunc func(a Tk, b Tk) int) []Tk {
+	keys := make([]Tk, 0, len(s))
+	for k := range s {
+		keys = append(keys, k)
+	}
+
+	slices.SortStableFunc(keys, compareFunc)
+
+	return keys
 }

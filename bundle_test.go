@@ -343,3 +343,43 @@ func TestEmptyBundle(t *testing.T) {
 		assert.Equal(t, "TestWithoutTag", test3.TestWithoutTag)
 	})
 }
+
+func TestBundle_CalcHash(t *testing.T) {
+	bundle1, err := i18n.NewBundle(i18n.English, i18n.FromDirs(i18n.YAML, false, "testdata/yaml"))
+	require.NoError(t, err)
+
+	bundle2, err := i18n.NewBundle(i18n.English, i18n.FromEmbeddedFS(i18n.JSON, embeddedJSON, true, "testdata/json"))
+	require.NoError(t, err)
+
+	bundle3 := i18n.NewEmptyBundle()
+
+	t.Run("expect stable hash", func(t *testing.T) {
+		curr := ""
+
+		for range 100 {
+			hash, err := bundle1.CalcHash()
+			require.NoError(t, err)
+
+			if curr != "" {
+				assert.Equal(t, curr, hash)
+			}
+
+			curr = hash
+		}
+	})
+
+	t.Run("expect hashes are different", func(t *testing.T) {
+		hash1, err := bundle1.CalcHash()
+		require.NoError(t, err)
+
+		hash2, err := bundle2.CalcHash()
+		require.NoError(t, err)
+
+		hash3, err := bundle3.CalcHash()
+		require.NoError(t, err)
+
+		assert.NotEqual(t, hash1, hash2)
+		assert.NotEqual(t, hash1, hash3)
+		assert.NotEqual(t, hash2, hash3)
+	})
+}
