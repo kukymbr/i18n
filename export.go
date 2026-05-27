@@ -25,7 +25,7 @@ func NewLanguageExport(b *Bundle, language Tag) LanguageExport {
 	translations, ok := b.translations[language]
 	if !ok {
 		return LanguageExport{
-			ETag:         b.CalcHash() + "_" + language.String(),
+			ETag:         FormatLanguageETag(b.CalcHash(), language),
 			Language:     language,
 			Translations: make(Translations),
 		}
@@ -69,4 +69,8 @@ func NewBundleExport(b *Bundle) BundleExport {
 	})
 
 	return container
+}
+
+func FormatLanguageETag(bundleHash string, lang Tag) string {
+	return bundleHash + "_" + lang.String()
 }
