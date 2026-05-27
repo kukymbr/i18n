@@ -7,7 +7,7 @@
 
 Package to translate things.
 
-This package helps you manage multi-language support in Go applications — from loading translation files to retrieving
+This package helps you manage multi-language support in Go applications: loads translations from files and returns
 localized strings with fallback logic.
 
 ## Installation
@@ -16,7 +16,7 @@ localized strings with fallback logic.
 go get github.com/kukymbr/i18n
 ```
 
-## Quick Start
+## Usage example
 
 ```go
 package main
@@ -24,32 +24,59 @@ package main
 import (
 	"embed"
 	"fmt"
-
 	"github.com/kukymbr/i18n"
 )
 
-//go:embed translations/*
-var i18nFS embed.FS
+//go:embed testdata/example/*
+var translationsFS embed.FS
 
-func main() {
-	// Load translations into a bundle
-	bundle, err := i18n.NewBundle("en", i18n.FromEmbeddedFS(i18n.YAML, i18nFS, true))
+func TranslateThings() {
+	// Load translations into a bundle.
+	bundle, err := i18n.NewBundle(i18n.English, i18n.FromEmbeddedFS(i18n.YAML, translationsFS, true, "testdata/example"))
 	if err != nil {
-	    panic(err)
+		panic(err)
 	}
 
-	// Retrieve translation by key and language
-	msg := bundle.T(i18n.English, "greeting.hello")
-	fmt.Println(msg) // Hello
+	// Retrieve translation by key and language.
+	msg := bundle.Translate(i18n.English, "greeting.hello")
+	fmt.Println(msg) // Hello!
 
-	msg = bundle.T(i18n.Spanish, "greeting.hello")
-	fmt.Println(msg) // Hola
+	msg = bundle.Translate(i18n.Spanish, "greeting.hello_name", struct{ Name string }{"Mateo"})
+	fmt.Println(msg) // ¡Hola, Mateo!
 
-	// Fallback to the default language if missing
-	msg = bundle.T(i18n.French, "greeting.hello")
-	fmt.Println(msg) // Hello (from default en)
+	// Fallback to the default language if missing.
+	msg = bundle.Translate(i18n.French, "common.app_name")
+	fmt.Println(msg) // i18n Example (from fallback en)
 }
 ```
+
+## Quick start
+
+1. Create some YAML files with translations. 
+   File could have any name, but you may like the next format: `<semantic_namespace>.<lang>.yaml`.
+   Every file must contain the following structure:
+   ```yaml
+   # Code of the language presented in the file.
+   language: en
+   # Translations in key:value format.
+   translations:
+      # Keys could have any level of nesting.
+      greeting: 
+        hello: Hello!
+   ```
+   See the [testdata/example](testdata/example) for an example.
+2. Create the bundle, using one of the `From*` functions (see [bundlesource.go](bundlesource.go)):
+   ```go
+   bundle, err := i18n.NewBundle(i18n.English, i18n.FromDirs(i18n.YAML, true, "testdata/example"))
+   ```
+3. Translate:
+   ```go
+   msg := bundle.Translate(i18n.English, "greeting.hello")
+   ```
+
+## Documentation
+
+See the [Go reference](https://godoc.org/github.com/kukymbr/i18n).
 
 ## License
 

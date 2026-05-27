@@ -1,0 +1,4 @@
+language: es
+translations:
+  common:
+    app_name: i18n Ejemplo

@@ -1,0 +1,4 @@
+language: es
+translations:
+  greeting.hello: ¡Hola!
+  greeting.hello_name: ¡Hola, {{ .Name }}!
