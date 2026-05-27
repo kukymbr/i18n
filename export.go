@@ -22,16 +22,19 @@ func NewLanguageExport(b *Bundle, language Tag) LanguageExport {
 		b = NewEmptyBundle()
 	}
 
+	etag := FormatLanguageETag(b.CalcHash(), language)
+
 	translations, ok := b.translations[language]
 	if !ok {
 		return LanguageExport{
-			ETag:         FormatLanguageETag(b.CalcHash(), language),
+			ETag:         etag,
 			Language:     language,
 			Translations: make(Translations),
 		}
 	}
 
 	return LanguageExport{
+		ETag:         etag,
 		Language:     language,
 		Translations: translations,
 	}
