@@ -4,14 +4,37 @@ import "slices"
 
 // BundleExport is an exportable structure representing a Bundle.
 type BundleExport struct {
+	ETag             string           `json:"etag" yaml:"etag"`
 	FallbackLanguage Tag              `json:"fallback_language" yaml:"fallback_language"`
 	Languages        []LanguageExport `json:"languages" yaml:"languages"`
 }
 
 // LanguageExport is an exportable structure representing single language translations.
 type LanguageExport struct {
+	ETag         string       `json:"etag" yaml:"etag"`
 	Language     Tag          `json:"language" yaml:"language"`
 	Translations Translations `json:"translations" yaml:"translations"`
+}
+
+// NewLanguageExport returns new LanguageExport for the language from the bundle.
+func NewLanguageExport(b *Bundle, language Tag) LanguageExport {
+	if b == nil {
+		b = NewEmptyBundle()
+	}
+
+	translations, ok := b.translations[language]
+	if !ok {
+		return LanguageExport{
+			ETag:         b.CalcHash() + "_" + language.String(),
+			Language:     language,
+			Translations: make(Translations),
+		}
+	}
+
+	return LanguageExport{
+		Language:     language,
+		Translations: translations,
+	}
 }
 
 // NewBundleExport creates a new BundleExport instance from a Bundle.
@@ -21,6 +44,7 @@ func NewBundleExport(b *Bundle) BundleExport {
 	}
 
 	container := BundleExport{
+		ETag:             b.CalcHash(),
 		FallbackLanguage: b.fallbackLanguage,
 		Languages:        make([]LanguageExport, 0, len(b.translations)),
 	}

@@ -85,13 +85,13 @@ func (b *Bundle) GetFallbackLanguage() Tag {
 
 // CalcHash calculates hash of the whole bundle.
 // Calculates hash once per instance.
-func (b *Bundle) CalcHash() (string, error) {
+func (b *Bundle) CalcHash() string {
 	b.hashMu.RLock()
 
 	if b.hash != "" {
 		b.hashMu.RUnlock()
 
-		return b.hash, nil
+		return b.hash
 	}
 
 	b.hashMu.RUnlock()
@@ -118,7 +118,17 @@ func (b *Bundle) CalcHash() (string, error) {
 
 	b.hash = hex.EncodeToString(hasher.Sum(nil))
 
-	return b.hash, nil
+	return b.hash
+}
+
+// GetLanguageExport returns exportable translations for the given language.
+func (b *Bundle) GetLanguageExport(lang Tag) LanguageExport {
+	return NewLanguageExport(b, lang)
+}
+
+// GetBundleExport returns exportable version of the Bundle.
+func (b *Bundle) GetBundleExport() BundleExport {
+	return NewBundleExport(b)
 }
 
 // Translate finds a translation for a key.

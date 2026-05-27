@@ -357,9 +357,7 @@ func TestBundle_CalcHash(t *testing.T) {
 		curr := ""
 
 		for range 100 {
-			hash, err := bundle1.CalcHash()
-			require.NoError(t, err)
-
+			hash := bundle1.CalcHash()
 			if curr != "" {
 				assert.Equal(t, curr, hash)
 			}
@@ -369,14 +367,9 @@ func TestBundle_CalcHash(t *testing.T) {
 	})
 
 	t.Run("expect hashes are different", func(t *testing.T) {
-		hash1, err := bundle1.CalcHash()
-		require.NoError(t, err)
-
-		hash2, err := bundle2.CalcHash()
-		require.NoError(t, err)
-
-		hash3, err := bundle3.CalcHash()
-		require.NoError(t, err)
+		hash1 := bundle1.CalcHash()
+		hash2 := bundle2.CalcHash()
+		hash3 := bundle3.CalcHash()
 
 		assert.NotEqual(t, hash1, hash2)
 		assert.NotEqual(t, hash1, hash3)
