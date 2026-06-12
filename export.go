@@ -1,6 +1,9 @@
 package i18n
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
 
 // BundleExport is an exportable structure representing a Bundle.
 type BundleExport struct {
@@ -16,8 +19,18 @@ type LanguageExport struct {
 	Translations Translations `json:"translations" yaml:"translations"`
 }
 
+// TranslationsFilterFunc is a function deciding add translation key or not to the exported translations.
+type TranslationsFilterFunc func(key string) bool
+
+// FilterByPrefix is a TranslationsFilterFunc keeping only translations with the given key prefix.
+func FilterByPrefix(prefix string) TranslationsFilterFunc {
+	return func(key string) bool {
+		return strings.HasPrefix(key, prefix)
+	}
+}
+
 // NewLanguageExport returns new LanguageExport for the language from the bundle.
-func NewLanguageExport(b *Bundle, language Tag) LanguageExport {
+func NewLanguageExport(b *Bundle, language Tag, filters ...TranslationsFilterFunc) LanguageExport {
 	if b == nil {
 		b = NewEmptyBundle()
 	}
@@ -36,12 +49,12 @@ func NewLanguageExport(b *Bundle, language Tag) LanguageExport {
 	return LanguageExport{
 		ETag:         etag,
 		Language:     language,
-		Translations: translations,
+		Translations: FilterTranslations(translations, filters...),
 	}
 }
 
 // NewBundleExport creates a new BundleExport instance from a Bundle.
-func NewBundleExport(b *Bundle) BundleExport {
+func NewBundleExport(b *Bundle, filters ...TranslationsFilterFunc) BundleExport {
 	if b == nil {
 		b = NewEmptyBundle()
 	}
@@ -55,7 +68,7 @@ func NewBundleExport(b *Bundle) BundleExport {
 	for lang, translations := range b.translations {
 		container.Languages = append(container.Languages, LanguageExport{
 			Language:     lang,
-			Translations: translations,
+			Translations: FilterTranslations(translations, filters...),
 		})
 	}
 
@@ -76,4 +89,27 @@ func NewBundleExport(b *Bundle) BundleExport {
 
 func FormatLanguageETag(bundleHash string, lang Tag) string {
 	return bundleHash + "_" + lang.String()
+}
+
+// FilterTranslations filters the Translations using the filtering functions.
+func FilterTranslations(translations Translations, filters ...TranslationsFilterFunc) Translations {
+	result := make(Translations, len(translations))
+
+	if len(filters) == 0 {
+		filters = append(filters, func(key string) bool {
+			return true
+		})
+	}
+
+	for key, translation := range translations {
+		for _, filter := range filters {
+			if !filter(key) {
+				continue
+			}
+
+			result[key] = translation
+		}
+	}
+
+	return result
 }

@@ -122,13 +122,13 @@ func (b *Bundle) CalcHash() string {
 }
 
 // GetLanguageExport returns exportable translations for the given language.
-func (b *Bundle) GetLanguageExport(lang Tag) LanguageExport {
-	return NewLanguageExport(b, lang)
+func (b *Bundle) GetLanguageExport(lang Tag, filters ...TranslationsFilterFunc) LanguageExport {
+	return NewLanguageExport(b, lang, filters...)
 }
 
 // GetBundleExport returns exportable version of the Bundle.
-func (b *Bundle) GetBundleExport() BundleExport {
-	return NewBundleExport(b)
+func (b *Bundle) GetBundleExport(filters ...TranslationsFilterFunc) BundleExport {
+	return NewBundleExport(b, filters...)
 }
 
 // Translate finds a translation for a key.

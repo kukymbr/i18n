@@ -376,3 +376,62 @@ func TestBundle_CalcHash(t *testing.T) {
 		assert.NotEqual(t, hash2, hash3)
 	})
 }
+
+func TestBundle_Export(t *testing.T) {
+	bundle, err := i18n.NewBundle(i18n.English, i18n.FromDirs(i18n.YAML, true, "testdata/yaml"))
+	require.NoError(t, err)
+
+	t.Run("full export", func(t *testing.T) {
+		export := bundle.GetBundleExport()
+		require.NotEmpty(t, export)
+
+		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d", export.ETag)
+		assert.Equal(t, i18n.English, export.FallbackLanguage)
+
+		require.Len(t, export.Languages, 2)
+		assert.Equal(t, i18n.English, export.Languages[0].Language)
+		assert.Equal(t, i18n.Spanish, export.Languages[1].Language)
+		assert.Len(t, export.Languages[0].Translations, 6)
+		assert.Len(t, export.Languages[1].Translations, 3)
+	})
+
+	t.Run("bundle export with filter", func(t *testing.T) {
+		export := bundle.GetBundleExport(i18n.FilterByPrefix("errors."))
+		require.NotEmpty(t, export)
+
+		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d", export.ETag)
+		assert.Equal(t, i18n.English, export.FallbackLanguage)
+
+		require.Len(t, export.Languages, 2)
+		assert.Equal(t, i18n.English, export.Languages[0].Language)
+		assert.Equal(t, i18n.Spanish, export.Languages[1].Language)
+		assert.Len(t, export.Languages[0].Translations, 4)
+		assert.Len(t, export.Languages[1].Translations, 0)
+	})
+
+	t.Run("language export", func(t *testing.T) {
+		export := bundle.GetLanguageExport(i18n.English)
+		require.NotEmpty(t, export)
+
+		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d_en", export.ETag)
+		assert.Equal(t, i18n.English, export.Language)
+		assert.Len(t, export.Translations, 6)
+	})
+
+	t.Run("language export with filter", func(t *testing.T) {
+		export := bundle.GetLanguageExport(i18n.English, i18n.FilterByPrefix("errors."))
+		require.NotEmpty(t, export)
+
+		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d_en", export.ETag)
+		assert.Equal(t, i18n.English, export.Language)
+		assert.Len(t, export.Translations, 4)
+	})
+
+	t.Run("language export with unregistered language", func(t *testing.T) {
+		export := bundle.GetLanguageExport(i18n.Hebrew)
+		require.NotEmpty(t, export)
+
+		assert.Equal(t, i18n.Hebrew, export.Language)
+		assert.Len(t, export.Translations, 0)
+	})
+}
