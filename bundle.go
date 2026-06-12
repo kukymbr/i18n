@@ -11,9 +11,6 @@ import (
 	"github.com/kukymbr/i18n/internal/tagsparser"
 )
 
-// Translations is a map of translations in a key:text format
-type Translations map[string]string
-
 // Bundle is an i18n translations bundle.
 type Bundle struct {
 	fallbackLanguage Tag
@@ -178,6 +175,25 @@ func (b *Bundle) addTranslation(lang Tag, key string, text string) {
 	}
 
 	b.translations[lang][key] = text
+}
+
+// Translations is a map of translations in a key:text format
+type Translations map[string]string
+
+// ToDict returns Translations as a key-value map.
+// The given trimPrefixes could be removed from the keys.
+func (t Translations) ToDict(trimPrefixes ...string) map[string]string {
+	result := make(map[string]string, len(t))
+
+	for key, value := range t {
+		for _, prefix := range trimPrefixes {
+			key = strings.TrimPrefix(key, prefix)
+		}
+
+		result[key] = value
+	}
+
+	return result
 }
 
 func getSortedKeys[Tk comparable, Tv any](s map[Tk]Tv, compareFunc func(a Tk, b Tk) int) []Tk {

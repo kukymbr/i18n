@@ -425,6 +425,14 @@ func TestBundle_Export(t *testing.T) {
 		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d_en", export.ETag)
 		assert.Equal(t, i18n.English, export.Language)
 		assert.Len(t, export.Translations, 4)
+
+		dict := export.Translations.ToDict("errors.nested.", "errors.")
+		assert.Equal(t, map[string]string{
+			"test_4": "Error 1",
+			"test_5": "Error 2",
+			"test_6": "Error 3",
+			"test_7": "Error 4",
+		}, dict)
 	})
 
 	t.Run("language export with unregistered language", func(t *testing.T) {
