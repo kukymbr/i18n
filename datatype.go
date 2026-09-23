@@ -1,7 +1,9 @@
 package i18n
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/kukymbr/i18n/json"
@@ -29,6 +31,10 @@ var dataTypeFilters = map[DataType][]*regexp.Regexp{
 // DataType is a bundle source data type.
 type DataType string
 
+func (d DataType) String() string {
+	return string(d)
+}
+
 // UnmarshalerFunc is a function to unmarshal data.
 type UnmarshalerFunc func(data []byte, v any) error
 
@@ -55,4 +61,19 @@ func RegisterDataType(t DataType, fn UnmarshalerFunc, fileNameFilters ...*regexp
 	}
 
 	dataTypeFilters[t] = fileNameFilters
+}
+
+// ParseDataType parses input string as a DataType.
+func ParseDataType[T ~string](inp T) (DataType, error) {
+	v := string(inp)
+	v = strings.TrimSpace(v)
+	v = strings.ToUpper(v)
+
+	for t := range unmarshalers {
+		if strings.ToUpper(t.String()) == v {
+			return t, nil
+		}
+	}
+
+	return "", fmt.Errorf("unsupported data type %s", v)
 }

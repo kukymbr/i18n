@@ -2,6 +2,7 @@ language: en
 translations:
   test_1: Test 1 in YAML
   test_3: Test {{ .TestN }} in YAML
+  test_4: Test 4 in YAML
   errors:
     test_4: Error 1
     test_5: Error 2

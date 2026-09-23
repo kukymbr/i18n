@@ -15,6 +15,9 @@ import (
 //go:embed all:testdata/json
 var embeddedJSON embed.FS
 
+//go:embed all:testdata/yaml
+var embeddedYAML embed.FS
+
 //go:embed testdata/json_invalid
 var embeddedInvalidJSON embed.FS
 
@@ -385,21 +388,21 @@ func TestBundle_Export(t *testing.T) {
 		export := bundle.GetBundleExport()
 		require.NotEmpty(t, export)
 
-		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d", export.ETag)
+		assert.Equal(t, "5b8abd1cf60d2faca0b19e97d42ad724e8caeb5d7d4ecc81a463ad39d3c1fe29", export.ETag)
 		assert.Equal(t, i18n.English, export.FallbackLanguage)
 
 		require.Len(t, export.Languages, 2)
 		assert.Equal(t, i18n.English, export.Languages[0].Language)
 		assert.Equal(t, i18n.Spanish, export.Languages[1].Language)
-		assert.Len(t, export.Languages[0].Translations, 6)
-		assert.Len(t, export.Languages[1].Translations, 3)
+		assert.Len(t, export.Languages[0].Translations, 7)
+		assert.Len(t, export.Languages[1].Translations, 4)
 	})
 
 	t.Run("bundle export with filter", func(t *testing.T) {
 		export := bundle.GetBundleExport(i18n.FilterByPrefix("errors."))
 		require.NotEmpty(t, export)
 
-		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d", export.ETag)
+		assert.Equal(t, "5b8abd1cf60d2faca0b19e97d42ad724e8caeb5d7d4ecc81a463ad39d3c1fe29", export.ETag)
 		assert.Equal(t, i18n.English, export.FallbackLanguage)
 
 		require.Len(t, export.Languages, 2)
@@ -413,16 +416,16 @@ func TestBundle_Export(t *testing.T) {
 		export := bundle.GetLanguageExport(i18n.English)
 		require.NotEmpty(t, export)
 
-		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d_en", export.ETag)
+		assert.Equal(t, "5b8abd1cf60d2faca0b19e97d42ad724e8caeb5d7d4ecc81a463ad39d3c1fe29_en", export.ETag)
 		assert.Equal(t, i18n.English, export.Language)
-		assert.Len(t, export.Translations, 6)
+		assert.Len(t, export.Translations, 7)
 	})
 
 	t.Run("language export with filter", func(t *testing.T) {
 		export := bundle.GetLanguageExport(i18n.English, i18n.FilterByPrefix("errors."))
 		require.NotEmpty(t, export)
 
-		assert.Equal(t, "493c0c5171d56aec098bc66c8e7ee3f115a3b98478bf5128e8b9ae67d411a70d_en", export.ETag)
+		assert.Equal(t, "5b8abd1cf60d2faca0b19e97d42ad724e8caeb5d7d4ecc81a463ad39d3c1fe29_en", export.ETag)
 		assert.Equal(t, i18n.English, export.Language)
 		assert.Len(t, export.Translations, 4)
 

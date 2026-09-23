@@ -52,7 +52,7 @@ func TranslateThings() {
 
 ## Quick start
 
-1. Create some YAML files with translations. 
+1. Create some YAML files with translations.
    File could have any name, but you may like the next format: `<semantic_namespace>.<lang>.yaml`.
    Every file must contain the following structure:
    ```yaml
@@ -73,6 +73,36 @@ func TranslateThings() {
    ```go
    msg := bundle.Translate(i18n.English, "greeting.hello")
    ```
+
+## CLI Validator
+
+The package includes a command-line tool to validate your translation bundles. 
+It scans your directories and reports any missing keys or empty values across different languages.
+
+> **Note:** The CLI validator currently only supports the built-in default data types (`yaml` and `json`).
+
+### Installation
+
+For CI/CD pipelines or global usage, you can install the CLI tool directly using `go install`. 
+This will download, compile, and place the binary into your `$GOPATH/bin` directory.
+
+*Note: Ensure your `$GOPATH/bin` is added to your system's `$PATH`.*
+
+```bash
+go install github.com/kukymbr/i18n/cmd/validator@latest
+```
+
+### Usage
+
+```bash
+i18nvalidator --dir=./testdata/example --type=yaml --recursive=true --verbose
+```
+
+**Available Flags:**
+* `--dir`: Path to the directory with the bundle files (default: `.`)
+* `--type`: Data type to validate (`yaml` or `json`) (default: `yaml`)
+* `--recursive`: Process the directory recursively (default: `true`)
+* `--verbose`: Enable verbose output
 
 ## Documentation
 

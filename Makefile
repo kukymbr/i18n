@@ -34,5 +34,8 @@ test_report:
 test_short:
 	go test -short ./...
 
+build_validator:
+	go build -o ./bin/i18nvalidator ./cmd/i18nvalidator
+
 clean:
 	go clean
